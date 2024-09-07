@@ -11,7 +11,7 @@ namespace Car_Traders.Forms
         public UserCarForm()
         {
             InitializeComponent();
-            // Subscribe to the Load event
+            
             this.Load += new System.EventHandler(this.UserCarForm_Load);
         }
 
@@ -72,7 +72,7 @@ namespace Car_Traders.Forms
         }
         private void LoadCars(string name = "", string brand = "")
         {
-            flowLayoutPanelCars.Controls.Clear();  // Clear existing controls in the panel
+            flowLayoutPanelCars.Controls.Clear();
 
             try
             {
@@ -132,5 +132,11 @@ namespace Car_Traders.Forms
             }
         }
 
+        private void btnClearFilter_Click(object sender, EventArgs e)
+        {
+            
+            LoadCars();
+        }
     }
+
 }

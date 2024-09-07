@@ -74,10 +74,7 @@ namespace Car_Traders
 
                         MessageBox.Show($"{PartName} has been successfully added to your orders.", "Order Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        // Redirect to the Order Status Form
-                        OrderStatusForm orderStatusForm = new OrderStatusForm();
-                        orderStatusForm.Show();
-                        ((Form)this.TopLevelControl).Hide();  // Hide the current form
+                        
                     }
                     catch (Exception ex)
                     {

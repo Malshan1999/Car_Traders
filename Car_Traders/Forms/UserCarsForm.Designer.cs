@@ -77,6 +77,7 @@
             this.btnClearFilter.TabIndex = 32;
             this.btnClearFilter.Text = "Clear Filters";
             this.btnClearFilter.UseVisualStyleBackColor = false;
+            this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
             // 
             // lblSearch
             // 

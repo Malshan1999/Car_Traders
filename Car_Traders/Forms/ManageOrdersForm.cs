@@ -135,8 +135,8 @@ namespace Car_Traders.Forms
                 MailMessage mail = new MailMessage();
                 mail.From = new MailAddress("primecartraderssrilanka@gmail.com");
                 mail.To.Add(email);
-                mail.Subject = "Your Order Confirmation - ABC Car Traders";
-                mail.Body = $"Dear {username},\n\nYour order has been confirmed. Please find the order confirmation report attached.\n\nBest regards,\nABC Car Traders Team";
+                mail.Subject = "Your Order Confirmation - Prime Car Traders";
+                mail.Body = $"Dear {username},\n\nYour order has been confirmed. Please find the order confirmation report attached.\n\nBest regards,\nPrime Car Traders Team";
 
 
                 Attachment attachment = new Attachment(pdfPath);
@@ -151,7 +151,7 @@ namespace Car_Traders.Forms
                 // Send the email
                 smtpClient.Send(mail);
 
-                MessageBox.Show("Email sent successfully with the report attached.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                
             }
             catch (Exception ex)
             {

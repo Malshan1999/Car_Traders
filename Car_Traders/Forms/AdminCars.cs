@@ -58,7 +58,7 @@ namespace Car_Traders.Forms
             string fuel = cmb_FuelType.SelectedItem.ToString();
             string color = txtColor.Text;
             int price = int.Parse(txtPrice.Text);
-            string imageName = txtImageName.Text;  // Ensure this is set correctly and contains only the file name
+            string imageName = txtImageName.Text;  
             byte[] imageBytes;
 
             using (MemoryStream ms = new MemoryStream())
@@ -79,8 +79,8 @@ namespace Car_Traders.Forms
                         command.Parameters.AddWithValue("@Year", year);
                         command.Parameters.AddWithValue("@FuelType", fuel);
                         command.Parameters.AddWithValue("@Color", color);
-                        command.Parameters.AddWithValue("@ImageName", imageName);  // Store file name
-                        command.Parameters.AddWithValue("@ImageData", imageBytes);  // Store image data
+                        command.Parameters.AddWithValue("@ImageName", imageName);  
+                        command.Parameters.AddWithValue("@ImageData", imageBytes);
                         command.Parameters.AddWithValue("@Price", price);
 
                         command.ExecuteNonQuery();
@@ -112,8 +112,23 @@ namespace Car_Traders.Forms
 
         private void btnClear_Click(object sender, EventArgs e)
         {
+            // Clear all the  fields
+            txtName.Text = "";
+            txtManufacturer.Text = "";
+            txtYear.Text = "";
+            txtColor.Text = "";
+            txtPrice.Text = "";
+            txtImageName.Text = "";  
+
+            
+            cmb_FuelType.SelectedIndex = -1;  
+
+            
+            CarPicture.Image = null;  
+
             
         }
+
 
         private void txtFuel_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -202,7 +217,7 @@ namespace Car_Traders.Forms
             if (string.IsNullOrEmpty(txtSearch.Text))
             {
                 MessageBox.Show("Search term is empty! Please fill it", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                LoadCars(); // Assuming LoadCars() populates the DataGridView with all cars
+                LoadCars(); 
                 return;
             }
 
@@ -218,32 +233,47 @@ namespace Car_Traders.Forms
 
                     if (isIntString)
                     {
+                        // Convert the search term to an integer (year)
+                        int year = int.Parse(searchTerm);
+
+                        // Define the valid range for the year
+                        int minYear = 2000;
+                        int maxYear = DateTime.Now.Year;
+
+                        // Validate if the year is within the range
+                        if (year < minYear || year > maxYear)
+                        {
+                            MessageBox.Show($"Please enter a valid year between {minYear} and {maxYear}.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
                         // Search by Year
                         query = "SELECT * FROM Cars WHERE Year = @Year";
+                        using (SqlCommand command = new SqlCommand(query, connection))
+                        {
+                            command.Parameters.AddWithValue("@Year", year);
+                            SqlDataAdapter adapter = new SqlDataAdapter(command);
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            CarGrid.DataSource = dataTable;
+                            CarGrid.AutoGenerateColumns = false;
+                        }
                     }
                     else
                     {
-                        // Search by Model or Name
+                        // Search by  Name
                         query = "SELECT * FROM Cars WHERE Name LIKE @SearchTerm";
-                    }
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        if (isIntString)
-                        {
-                            command.Parameters.AddWithValue("@Year", int.Parse(searchTerm));
-                        }
-                        else
+                        using (SqlCommand command = new SqlCommand(query, connection))
                         {
                             command.Parameters.AddWithValue("@SearchTerm", "%" + searchTerm + "%");
+                            SqlDataAdapter adapter = new SqlDataAdapter(command);
+                            DataTable dataTable = new DataTable();
+                            adapter.Fill(dataTable);
+
+                            CarGrid.DataSource = dataTable;
+                            CarGrid.AutoGenerateColumns = false;
                         }
-
-                        SqlDataAdapter adapter = new SqlDataAdapter(command);
-                        DataTable dataTable = new DataTable();
-                        adapter.Fill(dataTable);
-
-                        CarGrid.DataSource = dataTable;
-                        CarGrid.AutoGenerateColumns = false;
                     }
                 }
                 catch (Exception ex)
@@ -253,6 +283,7 @@ namespace Car_Traders.Forms
             }
         }
 
+
         private void btnClearFilter_Click(object sender, EventArgs e)
         {
             txtSearch.Text = "";
@@ -261,8 +292,83 @@ namespace Car_Traders.Forms
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            
+            if (CarGrid.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a car to update.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Retrieve the selected car's CarID (assuming CarID is a hidden column in the DataGridView)
+            int selectedRowIndex = CarGrid.SelectedRows[0].Index;
+            int carID = Convert.ToInt32(CarGrid.Rows[selectedRowIndex].Cells["CarID"].Value); // Replace "CarID" with actual column name
+
+            // Validate that all required fields are filled
+            if (txtName.Text == "" || txtManufacturer.Text == "" || txtYear.Text == "" || cmb_FuelType.SelectedItem == null || txtColor.Text == "" || txtPrice.Text == "" || CarPicture.Image == null)
+            {
+                MessageBox.Show("All fields, including the image, are required!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Gather updated information from the form fields
+            string name = txtName.Text;
+            string manufacturer = txtManufacturer.Text;
+            int year = int.Parse(txtYear.Text);
+            string fuelType = cmb_FuelType.SelectedItem.ToString();
+            string color = txtColor.Text;
+            int price = int.Parse(txtPrice.Text);
+            string imageName = txtImageName.Text;
+            byte[] imageBytes;
+
+            // Convert image to byte array for database storage
+            using (MemoryStream ms = new MemoryStream())
+            {
+                CarPicture.Image.Save(ms, CarPicture.Image.RawFormat);
+                imageBytes = ms.ToArray();
+            }
+
+            // Update the car details in the database
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(DbConnection.GetConnectionString()))
+                {
+                    connection.Open();
+
+                    string updateQuery = @"UPDATE Cars
+                                   SET Name = @Name, Manufacturer = @Manufacturer, Year = @Year, FuelType = @FuelType, 
+                                       Color = @Color, ImageName = @ImageName, ImageData = @ImageData, Price = @Price
+                                   WHERE CarID = @CarID";
+
+                    using (SqlCommand command = new SqlCommand(updateQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@Name", name);
+                        command.Parameters.AddWithValue("@Manufacturer", manufacturer);
+                        command.Parameters.AddWithValue("@Year", year);
+                        command.Parameters.AddWithValue("@FuelType", fuelType);
+                        command.Parameters.AddWithValue("@Color", color);
+                        command.Parameters.AddWithValue("@ImageName", imageName);  // Store file name
+                        command.Parameters.AddWithValue("@ImageData", imageBytes);  // Store image data
+                        command.Parameters.AddWithValue("@Price", price);
+                        command.Parameters.AddWithValue("@CarID", carID);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            MessageBox.Show("Car details updated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            LoadCars();  // Refresh the list to show updated data
+                        }
+                        else
+                        {
+                            MessageBox.Show("Failed to update the car details.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while updating the car: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
+
 
         private void txtCarId_TextChanged(object sender, EventArgs e)
         {
@@ -281,7 +387,49 @@ namespace Car_Traders.Forms
 
         private void btnDeleteCar_Click(object sender, EventArgs e)
         {
+            if (CarGrid.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Please select a car to delete.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
+            // Assuming the CarID is stored in a hidden column in the DataGridView
+            int selectedRowIndex = CarGrid.SelectedRows[0].Index;
+            int carID = Convert.ToInt32(CarGrid.Rows[selectedRowIndex].Cells["CarID"].Value); // Replace "CarID" with the actual column name
+
+            // Confirm Deletion
+            DialogResult result = MessageBox.Show("Are you sure you want to delete this car?", "Confirm Deletion", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    using (SqlConnection connection = new SqlConnection(DbConnection.GetConnectionString()))
+                    {
+                        connection.Open();
+                        using (SqlCommand command = new SqlCommand("DELETE FROM Cars WHERE CarID = @CarID", connection))
+                        {
+                            command.Parameters.AddWithValue("@CarID", carID);
+
+                            int rowsAffected = command.ExecuteNonQuery();
+                            if (rowsAffected > 0)
+                            {
+                                MessageBox.Show("Car deleted successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                LoadCars(); // Refresh the car list in the DataGridView
+                            }
+                            else
+                            {
+                                MessageBox.Show("Failed to delete the car. It may no longer exist.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error while deleting car: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
+
     }
 }

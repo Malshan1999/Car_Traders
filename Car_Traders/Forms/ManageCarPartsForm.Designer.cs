@@ -34,6 +34,7 @@
             this.btnDeletePart = new System.Windows.Forms.Button();
             this.btnUpdate = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
+            this.picPart = new System.Windows.Forms.PictureBox();
             this.txtPrice = new System.Windows.Forms.TextBox();
             this.lblAddress = new System.Windows.Forms.Label();
             this.txtWarrenty = new System.Windows.Forms.TextBox();
@@ -48,16 +49,15 @@
             this.btnSelectImage = new System.Windows.Forms.Button();
             this.btnAddPart = new System.Windows.Forms.Button();
             this.lblAddNewPart = new System.Windows.Forms.Label();
+            this.txtImageName = new System.Windows.Forms.TextBox();
             this.lblSearch = new System.Windows.Forms.Label();
             this.btnClearFilter = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.PartGrid = new System.Windows.Forms.DataGridView();
             this.btnSearch = new System.Windows.Forms.Button();
-            this.picPart = new System.Windows.Forms.PictureBox();
-            this.txtImageName = new System.Windows.Forms.TextBox();
             this.panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PartGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPart)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PartGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -155,6 +155,16 @@
             this.btnClear.Text = "Clear";
             this.btnClear.UseVisualStyleBackColor = false;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // picPart
+            // 
+            this.picPart.Image = global::Car_Traders.Properties.Resources.auto_parts_2;
+            this.picPart.Location = new System.Drawing.Point(154, 291);
+            this.picPart.Name = "picPart";
+            this.picPart.Size = new System.Drawing.Size(112, 97);
+            this.picPart.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picPart.TabIndex = 82;
+            this.picPart.TabStop = false;
             // 
             // txtPrice
             // 
@@ -307,6 +317,18 @@
             this.lblAddNewPart.TabIndex = 66;
             this.lblAddNewPart.Text = "Add New Part";
             // 
+            // txtImageName
+            // 
+            this.txtImageName.BackColor = System.Drawing.Color.LightGray;
+            this.txtImageName.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtImageName.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtImageName.Location = new System.Drawing.Point(200, 375);
+            this.txtImageName.Multiline = true;
+            this.txtImageName.Name = "txtImageName";
+            this.txtImageName.Size = new System.Drawing.Size(10, 10);
+            this.txtImageName.TabIndex = 89;
+            this.txtImageName.TextChanged += new System.EventHandler(this.txtImageName_TextChanged);
+            // 
             // lblSearch
             // 
             this.lblSearch.AutoSize = true;
@@ -365,28 +387,6 @@
             this.btnSearch.UseVisualStyleBackColor = false;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
-            // picPart
-            // 
-            this.picPart.Image = global::Car_Traders.Properties.Resources.auto_parts_2;
-            this.picPart.Location = new System.Drawing.Point(141, 258);
-            this.picPart.Name = "picPart";
-            this.picPart.Size = new System.Drawing.Size(112, 97);
-            this.picPart.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picPart.TabIndex = 82;
-            this.picPart.TabStop = false;
-            // 
-            // txtImageName
-            // 
-            this.txtImageName.BackColor = System.Drawing.Color.LightGray;
-            this.txtImageName.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtImageName.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtImageName.Location = new System.Drawing.Point(200, 375);
-            this.txtImageName.Multiline = true;
-            this.txtImageName.Name = "txtImageName";
-            this.txtImageName.Size = new System.Drawing.Size(10, 10);
-            this.txtImageName.TabIndex = 89;
-            this.txtImageName.TextChanged += new System.EventHandler(this.txtImageName_TextChanged);
-            // 
             // ManageCarPartsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -406,8 +406,8 @@
             this.Load += new System.EventHandler(this.ManageCarPartsForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.PartGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPart)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PartGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

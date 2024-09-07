@@ -58,6 +58,35 @@ namespace Car_Traders.Forms
                 return;
             }
 
+            // Validate input: Check if any of the fields are empty
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(contact) ||
+                string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                MessageBox.Show("All fields are required.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (contact.Length != 10 || !contact.All(char.IsDigit))
+            {
+                MessageBox.Show("The contact number must be exactly 10 digits long.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (!email.EndsWith("@gmail.com"))
+            {
+                MessageBox.Show("Email must be a Gmail address (ending with @gmail.com).", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (password.Length < 8 ||
+        !       System.Text.RegularExpressions.Regex.IsMatch(password, @"[a-zA-Z]") ||  // At least one letter
+        !       System.Text.RegularExpressions.Regex.IsMatch(password, @"[0-9]") ||    // At least one number
+        !       System.Text.RegularExpressions.Regex.IsMatch(password, @"[\W_]"))      // At least one special character
+            {
+                MessageBox.Show("Password must be at least 8 characters long and include at least one letter, one number, and one symbol.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // Hash the password
             string hashedPassword = HashPassword(password);
 
@@ -68,19 +97,67 @@ namespace Car_Traders.Forms
                 {
                     connection.Open();
 
-                    // Insert new user
-                    SqlCommand command = new SqlCommand(
+                    // Check if the username already exists
+                    SqlCommand checkUsernameCommand = new SqlCommand(
+                        "SELECT COUNT(*) FROM Users WHERE Username = @Username", connection);
+                    checkUsernameCommand.Parameters.AddWithValue("@Username", username);
+
+                    int usernameCount = (int)checkUsernameCommand.ExecuteScalar();
+                    if (usernameCount > 0)
+                    {
+                        MessageBox.Show("The username is already taken. Please choose a different username.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Check if the email already exists
+                    SqlCommand checkEmailCommand = new SqlCommand(
+                        "SELECT COUNT(*) FROM Users WHERE Email = @Email", connection);
+                    checkEmailCommand.Parameters.AddWithValue("@Email", email);
+
+                    int emailCount = (int)checkEmailCommand.ExecuteScalar();
+                    if (emailCount > 0)
+                    {
+                        MessageBox.Show("The email is already in use. Please choose a different email.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Check if the contact already exists
+                    SqlCommand checkContactCommand = new SqlCommand(
+                        "SELECT COUNT(*) FROM Users WHERE Contact = @Contact", connection);
+                    checkContactCommand.Parameters.AddWithValue("@Contact", contact);
+
+                    int contactCount = (int)checkContactCommand.ExecuteScalar();
+                    if (contactCount > 0)
+                    {
+                        MessageBox.Show("The contact number is already in use. Please choose a different contact number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Check if the NIC already exists
+                    SqlCommand checkNICCommand = new SqlCommand(
+                        "SELECT COUNT(*) FROM Users WHERE NIC = @NIC", connection);
+                    checkNICCommand.Parameters.AddWithValue("@NIC", nic);
+
+                    int nicCount = (int)checkNICCommand.ExecuteScalar();
+                    if (nicCount > 0)
+                    {
+                        MessageBox.Show("The NIC is already registered. Please check your details.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // Insert new user if no duplicates found
+                    SqlCommand insertCommand = new SqlCommand(
                         "INSERT INTO Users (Name, Username, Email, Contact, NIC, Address, Role, Password) VALUES (@Name, @Username, @Email, @Contact, @NIC, @Address, 'Customer', @Password)",
                         connection);
-                    command.Parameters.AddWithValue("@Name", name);
-                    command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@Email", email);
-                    command.Parameters.AddWithValue("@Contact", contact);
-                    command.Parameters.AddWithValue("@NIC", nic);
-                    command.Parameters.AddWithValue("@Address", address);
-                    command.Parameters.AddWithValue("@Password", hashedPassword);
+                    insertCommand.Parameters.AddWithValue("@Name", name);
+                    insertCommand.Parameters.AddWithValue("@Username", username);
+                    insertCommand.Parameters.AddWithValue("@Email", email);
+                    insertCommand.Parameters.AddWithValue("@Contact", contact);
+                    insertCommand.Parameters.AddWithValue("@NIC", nic);
+                    insertCommand.Parameters.AddWithValue("@Address", address);
+                    insertCommand.Parameters.AddWithValue("@Password", hashedPassword);
 
-                    command.ExecuteNonQuery();
+                    insertCommand.ExecuteNonQuery();
 
                     MessageBox.Show("Registration successful!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -93,6 +170,7 @@ namespace Car_Traders.Forms
                 }
             }
         }
+
 
         private string HashPassword(string password)
         {
@@ -119,7 +197,7 @@ namespace Car_Traders.Forms
                 // Create the mail message
                 MailMessage mail = new MailMessage();
                 mail.From = new MailAddress("primecartraderssrilanka@gmail.com");
-                mail.To.Add(email); // Ensure this email is valid and populated
+                mail.To.Add(email); 
                 mail.Subject = "Welcome to Prime Car Traders!";
                 mail.Body = $@"
 Dear {name},

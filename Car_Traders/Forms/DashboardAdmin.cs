@@ -72,5 +72,10 @@ namespace Car_Traders.Forms
         {
             
         }
+
+        private void mainpanel_Paint(object sender, PaintEventArgs e)
+        {
+           
+        }
     }
 }
